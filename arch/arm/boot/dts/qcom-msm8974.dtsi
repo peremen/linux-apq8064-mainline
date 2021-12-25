@@ -1540,7 +1540,7 @@
 			};
 
 			dsi0: dsi@fd922800 {
-				compatible = "qcom,dsi-ctrl-v2-msm8974", "qcom,mdss-dsi-ctrl";
+				compatible = "qcom,dsi-ctrl-6g-v1.2.0", "qcom,mdss-dsi-ctrl";
 				reg = <0xfd922800 0x1f8>;
 				reg-names = "dsi_ctrl";
 
