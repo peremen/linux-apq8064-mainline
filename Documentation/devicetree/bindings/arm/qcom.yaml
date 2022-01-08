@@ -151,6 +151,7 @@ properties:
 
       - items:
           - enum:
+              - samsung,expressatt
               - qcom,msm8960-cdp
           - const: qcom,msm8960
 
