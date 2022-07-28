@@ -338,6 +338,26 @@
 			clock-names = "core";
 		};
 
+		sdcc1bam: dma-controller@12402000{
+			compatible = "qcom,bam-v1.3.0";
+			reg = <0x12402000 0x8000>;
+			interrupts = <GIC_SPI 98 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&gcc SDC1_H_CLK>;
+			clock-names = "bam_clk";
+			#dma-cells = <1>;
+			qcom,ee = <0>;
+		};
+
+		sdcc3bam: dma-controller@12182000{
+			compatible = "qcom,bam-v1.3.0";
+			reg = <0x12182000 0x8000>;
+			interrupts = <GIC_SPI 96 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&gcc SDC3_H_CLK>;
+			clock-names = "bam_clk";
+			#dma-cells = <1>;
+			qcom,ee = <0>;
+		};
+
 		amba {
 			compatible = "simple-bus";
 			#address-cells = <1>;
@@ -347,7 +367,7 @@
 				status = "disabled";
 				compatible = "arm,pl18x", "arm,primecell";
 				arm,primecell-periphid = <0x00051180>;
-				reg = <0x12400000 0x8000>;
+				reg = <0x12400000 0x2000>;
 				interrupts = <GIC_SPI 104 IRQ_TYPE_LEVEL_HIGH>;
 				interrupt-names = "cmd_irq";
 				clocks = <&gcc SDC1_CLK>, <&gcc SDC1_H_CLK>;
@@ -357,13 +377,15 @@
 				non-removable;
 				cap-sd-highspeed;
 				cap-mmc-highspeed;
+				dmas = <&sdcc1bam 2>, <&sdcc1bam 1>;
+				dma-names = "tx", "rx";
 			};
 
 			sdcc3: mmc@12180000 {
 				compatible = "arm,pl18x", "arm,primecell";
 				arm,primecell-periphid = <0x00051180>;
 				status = "disabled";
-				reg = <0x12180000 0x8000>;
+				reg = <0x12180000 0x2000>;
 				interrupts = <GIC_SPI 102 IRQ_TYPE_LEVEL_HIGH>;
 				interrupt-names = "cmd_irq";
 				clocks = <&gcc SDC3_CLK>, <&gcc SDC3_H_CLK>;
@@ -373,6 +395,8 @@
 				cap-mmc-highspeed;
 				max-frequency = <192000000>;
 				no-1-8-v;
+				dmas = <&sdcc3bam 2>, <&sdcc3bam 1>;
+				dma-names = "tx", "rx";
 			};
 		};
 
