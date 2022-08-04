@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/input/atmel-maxtouch.h>
+#include <dt-bindings/gpio/gpio.h>
 
 #include "qcom-msm8960.dtsi"
 
@@ -30,14 +32,6 @@
 		};
 	};
 
-	/* gsbi5: uart (GPIO: 22, 23, 24, 25) */
-	gsbi@16400000 {
-		status = "okay";
-		qcom,mode = <GSBI_PROT_I2C_UART>;
-		serial@16440000 {
-			status = "okay";
-		};
-	};
 
 	soc {
 		amba {
@@ -378,6 +372,56 @@
 			};
 		};
 
+		/* gsbi3: i2c - cyttsp, mxt_device, mxt224e, backlight (rev3, rev >= 8), GPIO: 16 (SDA), 17 (SCL) */
+		gsbi@16200000 {
+			status = "okay";
+			qcom,mode = <GSBI_PROT_I2C>;
+
+			i2c@16280000 {
+				status = "okay";
+				clock-frequency = <100000>;
+				pinctrl-0 = <&i2c3_pins>;
+				pinctrl-1 = <&i2c3_pins_sleep>;
+				pinctrl-names = "default", "sleep";
+
+				/* 3-0038: lm3530 */
+				backlight@38 {
+					compatible = "ti,lm3530";
+					reg = <0x38>;
+
+					enable-gpios = <&pm8921_gpio 24 GPIO_ACTIVE_HIGH>;
+					default-brightness = <0x33>;
+					max-brightness = <0x7f>;
+					ramp-up-ms = <128>;
+					ramp-down-ms = <128>;
+					ti,current-limit = /bits/ 8 <0x05>; // 22.5 mA, bit 4 to 2 of 0x10
+					ti,led-mode = /bits/ 8 <0x00>; // PWM mode, Casio driver also do not touch ALS register
+					ti,linear-mapping-mode = /bits/ 8 <0>;
+				};
+
+				/* 3-004a: mXT224E */
+				touchscreen@4a {
+					compatible = "atmel,maxtouch";
+					reg = <0x4a>;
+
+					interrupt-parent = <&msmgpio>;
+					interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
+					reset-gpios = <&msmgpio 50 GPIO_ACTIVE_LOW>;
+					// atmel,wakeup-method = <ATMEL_MXT_WAKEUP_GPIO>;
+					// wake-gpios = <&pm8921_gpio 17 GPIO_ACTIVE_LOW>;
+				};
+			};
+		};
+
+		/* gsbi5: uart (GPIO: 22, 23, 24, 25) */
+		gsbi@16400000 {
+			status = "okay";
+			qcom,mode = <GSBI_PROT_I2C_UART>;
+			serial@16440000 {
+				status = "okay";
+			};
+		};
+
 		usb@12500000 {
 			status = "okay";
 			dr_mode = "otg";
@@ -425,5 +469,33 @@
 			>;
 		keypad,num-rows = <1>;
 		keypad,num-columns = <5>;
+	};
+};
+
+&msmgpio {
+	i2c3_pins: i2c3 {
+		mux {
+			pins = "gpio16", "gpio17";
+			function = "gsbi3";
+		};
+
+		pinconf {
+			pins = "gpio16", "gpio17";
+			drive-strength = <8>;
+			bias-disable;
+		};
+	};
+
+	i2c3_pins_sleep: i2c3-sleep {
+		mux {
+			pins = "gpio16", "gpio17";
+			function = "gsbi3";
+		};
+
+		pinconf {
+			pins = "gpio16", "gpio17";
+			drive-strength = <2>;
+			bias-disable;
+		};
 	};
 };
