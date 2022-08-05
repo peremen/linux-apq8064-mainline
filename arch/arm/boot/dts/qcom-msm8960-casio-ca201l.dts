@@ -423,8 +423,8 @@
 					ramp-up-ms = <128>;
 					ramp-down-ms = <128>;
 					ti,current-limit = /bits/ 8 <0x05>; // 22.5 mA, bit 4 to 2 of 0x10
-					ti,led-mode = /bits/ 8 <0x00>; // PWM mode, Casio driver also do not touch ALS register
-					ti,linear-mapping-mode = /bits/ 8 <1>;
+					ti,led-mode = /bits/ 8 <0x00>; /* Manual mode */
+					ti,linear-mapping-mode = /bits/ 8 <1>; /* Linear map */
 					ti,no-regulator;
 				};
 
