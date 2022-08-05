@@ -2,6 +2,7 @@
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/input/atmel-maxtouch.h>
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
 
 #include "qcom-msm8960.dtsi"
 
@@ -317,14 +318,14 @@
 					bias-pull-down;
 				};
 
-				/* No consumers defined in downstream kernel */
+				/* l29: touch_io */
 				/* changed-min-microvolt -> 1800000 */
 				/* changed-max-microvolt -> 1800000 */
-				// pm8921_l29: l29 {
-				// 	regulator-min-microvolt = <1800000>;
-				// 	regulator-max-microvolt = <1800000>;
-				// 	bias-pull-down;
-				// };
+				pm8921_l29: l29 {
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					bias-pull-down;
+				};
 
 				/* Low Voltage Switch */
 				/* lvs1: iris_vddio (wcnss_wlan.0) */
@@ -372,6 +373,32 @@
 			};
 		};
 
+		/* gsbi1: i2c - st21nfca, GPIO: 8, 9, 106 (ST21NFCA_WAKEUP) */
+		gsbi1: gsbi@16000000 {
+			status = "okay";
+			qcom,mode = <GSBI_PROT_I2C>;
+
+			i2c@16080000 {
+				status = "okay";
+				clock-frequency = <400000>;
+				pinctrl-0 = <&i2c1_pins>;
+				pinctrl-names = "default";
+
+				/* 1-0001: st21nfca */
+				nfc@1 {
+					compatible = "st,st21nfca-i2c";
+					reg = <0x1>;
+
+					interrupt-parent = <&msmgpio>;
+					interrupts = <106 IRQ_TYPE_LEVEL_LOW>;
+					// enable-gpios = <&msmgpio 106 GPIO_ACTIVE_HIGH>;
+
+					ese-present;
+					uicc-present;
+				};
+			};
+		};
+
 		/* gsbi3: i2c - cyttsp, mxt_device, mxt224e, backlight (rev3, rev >= 8), GPIO: 16 (SDA), 17 (SCL) */
 		gsbi@16200000 {
 			status = "okay";
@@ -386,17 +413,19 @@
 
 				/* 3-0038: lm3530 */
 				backlight@38 {
+					status = "okay";
 					compatible = "ti,lm3530";
 					reg = <0x38>;
 
 					enable-gpios = <&pm8921_gpio 24 GPIO_ACTIVE_HIGH>;
-					default-brightness = <0x33>;
-					max-brightness = <0x7f>;
+					default-brightness = /bits/ 8 <0x33>;
+					max-brightness = /bits/ 8 <0x7f>;
 					ramp-up-ms = <128>;
 					ramp-down-ms = <128>;
 					ti,current-limit = /bits/ 8 <0x05>; // 22.5 mA, bit 4 to 2 of 0x10
 					ti,led-mode = /bits/ 8 <0x00>; // PWM mode, Casio driver also do not touch ALS register
-					ti,linear-mapping-mode = /bits/ 8 <0>;
+					ti,linear-mapping-mode = /bits/ 8 <1>;
+					ti,no-regulator;
 				};
 
 				/* 3-004a: mXT224E */
@@ -404,11 +433,13 @@
 					compatible = "atmel,maxtouch";
 					reg = <0x4a>;
 
+					pinctrl-names = "default";
+					pinctrl-0 = <&mxt_irq>, <&mxt_reset>;
 					interrupt-parent = <&msmgpio>;
-					interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
+					interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
 					reset-gpios = <&msmgpio 50 GPIO_ACTIVE_LOW>;
-					// atmel,wakeup-method = <ATMEL_MXT_WAKEUP_GPIO>;
-					// wake-gpios = <&pm8921_gpio 17 GPIO_ACTIVE_LOW>;
+					atmel,wakeup-method = <ATMEL_MXT_WAKEUP_GPIO>;
+					wake-gpios = <&pm8921_gpio 17 GPIO_ACTIVE_HIGH>;
 				};
 			};
 		};
@@ -473,6 +504,19 @@
 };
 
 &msmgpio {
+	i2c1_pins: i2c1 {
+		mux {
+			pins = "gpio8", "gpio9";
+			function = "gsbi1";
+		};
+
+		pinconf {
+			pins = "gpio8", "gpio9";
+			drive-strength = <8>;
+			bias-disable;
+		};
+	};
+
 	i2c3_pins: i2c3 {
 		mux {
 			pins = "gpio16", "gpio17";
@@ -496,6 +540,58 @@
 			pins = "gpio16", "gpio17";
 			drive-strength = <2>;
 			bias-disable;
+		};
+	};
+
+	nfc_wake: nfc-wake {
+		mux {
+			pins = "gpio106";
+			function = "gpio";
+		};
+
+		pinconf {
+			pins = "gpio106";
+			drive-strengh = <2>;
+			bias-disable;
+		};
+	};
+
+	mxt_reset: mxt-reset {
+		mux {
+			pins = "gpio50";
+			function = "gpio";
+		};
+
+		pinconf {
+			pins = "gpio50";
+			drive-strength = <6>;
+			bias-pull-up;
+			output-high;
+		};
+	};
+
+	mxt_irq: mxt-irq {
+		mux {
+			pins = "gpio11";
+			function = "gpio";
+		};
+
+		pinconf {
+			pins = "gpio11";
+			drive-strength = <8>;
+			bias-pull-up;
+		};
+	};
+};
+
+&pm8921_gpio {
+	mxt_wakeup: mxt-wakeup {
+		mux {
+			pins = "gpio17";
+			function = "normal";
+			bias-disable;
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_HIGH>;
+			power-source = <PM8921_GPIO_S4>;
 		};
 	};
 };

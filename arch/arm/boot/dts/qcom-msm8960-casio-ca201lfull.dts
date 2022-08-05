@@ -337,15 +337,6 @@
 			// 	bias-disable;
 			// };
 
-			gsbi1_i2c: gsbi1-i2c {
-				i2c {
-					pins = "gpio8", "gpio9";
-					function = "gsbi1";
-
-					drive-strength = <8>;
-					bias-disable;
-				};
-			};
 
 			gsbi3_i2c: gsbi3-i2c {
 				i2c {
@@ -387,66 +378,6 @@
 			// 	};
 			// };
 		};
-
-		/* gsbi1: i2c - st21nfca, GPIO: 8, 9, 106 (ST21NFCA_WAKEUP) */
-		// gsbi1: gsbi@16000000 {
-		// 	qcom,mode = <GSBI_PROT_I2C>;
-
-		// 	i2c@16080000 {
-		// 		clock-frequency = <400000>;
-		// 		pinctrl-0 = <&i2c1_pins>;
-		// 		pinctrl-names = "default";
-
-		// 		/* 1-0001: st21nfca */
-		// 		nfc@1 {
-		// 			compatible = "st,st21nfca-i2c";
-		// 			reg = <0x1>;
-
-		// 			interrupt-parent = <&msmgpio>;
-		// 			interrupts = <106 IRQ_TYPE_LEVEL_LOW>;
-		// 			enable-gpios = <&msmgpio 106 GPIO_ACTIVE_HIGH>;
-
-		// 			ese-present;
-		// 			uicc-present;
-		// 		};
-		// 	};
-		// };
-
-		/* gsbi3: i2c - cyttsp, mxt_device, mxt224e, backlight (rev3, rev >= 8), GPIO: 16 (SDA), 17 (SCL) */
-		// gsbi3: gsbi@16200000 {
-		// 	qcom,mode = <GSBI_PROT_I2C>;
-
-		// 	i2c@16280000 {
-		// 		clock-frequency = <100000>;
-		// 		pinctrl-0 = <&i2c3_pins>;
-		// 		pinctrl-names = "default";
-
-		// 		/* 3-0038: lm3530 */
-		// 		backlight@38 {
-		// 			compatible = "ti,lm3530";
-		// 			enable-gpios = <&pm8921_gpio 24 GPIO_ACTIVE_HIGH>;
-		// 			default-brightness = <0x45>;
-		// 			max-brightness = <0x7f>;
-		// 			ramp-up-ms = <8>;
-		// 			ramp-down-ms = <8>;
-		// 			ti,current-limit = /bits/ 8 <0x15>; // 22.5 mA, raw register value
-		// 			ti,led-mode = /bits/ 8 <0x02>; // PWM mode, Casio driver also do not touch ALS register
-		// 			ti,linear-mapping-mode = /bits/ 8 <0>;
-		// 		};
-
-		// 		/* 3-004a: mXT224E */
-		// 		touchscreen@4a {
-		// 			compatible = "atmel,maxtouch";
-		// 			reg = <0x4a>;
-		// 			interrupt-parent = <&msmgpio>;
-		// 			interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
-		// 			reset-gpios = <&msmgpio 50 GPIO_ACTIVE_LOW>;
-		// 			atmel,wakeup-method = <ATMEL_MXT_WAKEUP_GPIO>;
-		// 			wake-gpios = <&pm8921 17 GPIO_ACTIVE_LOW>;
-		// 		};
-		// 	};
-			
-		// };
 
 		/* gsbi4: i2c - camera main, camera sub */
 		// mt9m113, mt9e013 - no drivers
