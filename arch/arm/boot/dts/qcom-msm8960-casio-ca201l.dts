@@ -379,19 +379,25 @@
 			qcom,mode = <GSBI_PROT_I2C>;
 
 			i2c@16080000 {
-				status = "okay";
+				status = "disabled";
 				clock-frequency = <400000>;
 				pinctrl-0 = <&i2c1_pins>;
 				pinctrl-names = "default";
 
 				/* 1-0001: st21nfca */
+				/* st21nfca_probe : IRQ GPIO is 106
+				   st21nfca_probe : ENA GPIO is 0
+				   st21nfca_probe : IRQ_TYPE is 2, active_polarity is 0
+				*/
 				nfc@1 {
 					compatible = "st,st21nfca-i2c";
 					reg = <0x1>;
 
+					pinctrl-names = "default";
+					pinctrl-0 = <&nfc_irq>, <&nfc_enable>;
 					interrupt-parent = <&msmgpio>;
-					interrupts = <106 IRQ_TYPE_LEVEL_LOW>;
-					// enable-gpios = <&msmgpio 106 GPIO_ACTIVE_HIGH>;
+					interrupts = <106 IRQ_TYPE_EDGE_FALLING>;
+					enable-gpios = <&msmgpio 0 GPIO_ACTIVE_HIGH>;
 
 					ese-present;
 					uicc-present;
@@ -589,7 +595,7 @@
 		};
 	};
 
-	nfc_wake: nfc-wake {
+	nfc_irq: nfc-irq {
 		mux {
 			pins = "gpio106";
 			function = "gpio";
@@ -597,6 +603,19 @@
 
 		pinconf {
 			pins = "gpio106";
+			drive-strengh = <2>;
+			bias-disable;
+		};
+	};
+
+	nfc_enable: nfc-enable {
+		mux {
+			pins = "gpio0";
+			function = "gpio";
+		};
+
+		pinconf {
+			pins = "gpio0";
 			drive-strengh = <2>;
 			bias-disable;
 		};
