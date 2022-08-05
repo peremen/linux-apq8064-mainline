@@ -399,7 +399,7 @@
 			};
 		};
 
-		/* gsbi3: i2c - cyttsp, mxt_device, mxt224e, backlight (rev3, rev >= 8), GPIO: 16 (SDA), 17 (SCL) */
+		/* gsbi3: i2c - mxt224e, backlight (rev3, rev >= 8), GPIO: 16 (SDA), 17 (SCL) */
 		gsbi@16200000 {
 			status = "okay";
 			qcom,mode = <GSBI_PROT_I2C>;
@@ -429,12 +429,17 @@
 				};
 
 				/* 3-004a: mXT224E */
+				/* power on: GPIO 50 -> 1, power off: GPIO 50 -> 0
+				   TOUCH_RESET_GPIO 50 -> direction output, 1
+				   MXT224E_TS_GPIO_IRQ 11 -> direction input
+				   MXT224E_TS_VDD 17 -> PM8921_GPIO_PM_TO_SYS
+				*/
 				touchscreen@4a {
 					compatible = "atmel,maxtouch";
 					reg = <0x4a>;
 
 					pinctrl-names = "default";
-					pinctrl-0 = <&mxt_irq>, <&mxt_reset>;
+					pinctrl-0 = <&mxt_irq>, <&mxt_reset>, <&mxt_wakeup>;
 					interrupt-parent = <&msmgpio>;
 					interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
 					reset-gpios = <&msmgpio 50 GPIO_ACTIVE_LOW>;
@@ -444,12 +449,40 @@
 			};
 		};
 
+		/* gsbi4: i2c - camera main, camera sub */
+		// mt9m113, mt9e013 - no drivers
+		// gsbi@16300000 {
+		// 	status = "okay";
+		// 	qcom,mode = <GSBI_PROT_I2C>;
+
+		// 	i2c@16380000 {
+		// 		status = "okay";
+		// 		clock-frequency = <360000>;
+		// 		pinctrl-0 = <&i2c4_pins>;
+		// 		pinctrl-names = "default";
+		// 	};
+		// };
+
 		/* gsbi5: uart (GPIO: 22, 23, 24, 25) */
 		gsbi@16400000 {
 			status = "okay";
 			qcom,mode = <GSBI_PROT_I2C_UART>;
 			serial@16440000 {
 				status = "okay";
+			};
+		};
+
+		/* gsbi8: i2c - yda160, es310 (GPIO: 36, 37) */
+		// es310, yda160 - no drivers
+		gsbi@1a000000 {
+			status = "okay";
+			qcom,mode = <GSBI_PROT_I2C>;
+
+			i2c@1a080000 {
+				status = "okay";
+				clock-frequency = <100000>;
+				pinctrl-0 = <&i2c8_pins>;
+				pinctrl-names = "default";
 			};
 		};
 
@@ -543,6 +576,19 @@
 		};
 	};
 
+	i2c8_pins: i2c8 {
+		mux {
+			pins = "gpio36", "gpio37";
+			function = "gsbi8";
+		};
+
+		pinconf {
+			pins = "gpio36", "gpio37";
+			drive-strength = <8>;
+			bias-disable;
+		};
+	};
+
 	nfc_wake: nfc-wake {
 		mux {
 			pins = "gpio106";
@@ -566,7 +612,6 @@
 			pins = "gpio50";
 			drive-strength = <6>;
 			bias-pull-up;
-			output-high;
 		};
 	};
 
