@@ -450,7 +450,7 @@ DEFINE_CLK_RPM(msm8960, mmfab_clk, mmfab_a_clk, QCOM_RPM_MM_FABRIC_CLK);
 DEFINE_CLK_RPM(msm8960, mmfpb_clk, mmfpb_a_clk, QCOM_RPM_MMFPB_CLK);
 DEFINE_CLK_RPM(msm8960, sfab_clk, sfab_a_clk, QCOM_RPM_SYS_FABRIC_CLK);
 DEFINE_CLK_RPM(msm8960, sfpb_clk, sfpb_a_clk, QCOM_RPM_SFPB_CLK);
-DEFINE_CLK_RPM(msm8960, qdss_clk, qdss_a_clk, QCOM_RPM_QDSS_CLK);
+// DEFINE_CLK_RPM(msm8960, qdss_clk, qdss_a_clk, QCOM_RPM_QDSS_CLK); XXX: causes kernel crash
 
 static struct clk_rpm *msm8960_clks[] = {
 	[RPM_APPS_FABRIC_CLK] = &msm8960_afab_clk,
@@ -469,8 +469,8 @@ static struct clk_rpm *msm8960_clks[] = {
 	[RPM_SYS_FABRIC_A_CLK] = &msm8960_sfab_a_clk,
 	[RPM_SFPB_CLK] = &msm8960_sfpb_clk,
 	[RPM_SFPB_A_CLK] = &msm8960_sfpb_a_clk,
-	[RPM_QDSS_CLK] = &msm8960_qdss_clk,
-	[RPM_QDSS_A_CLK] = &msm8960_qdss_a_clk,
+	// [RPM_QDSS_CLK] = &msm8960_qdss_clk,
+	// [RPM_QDSS_A_CLK] = &msm8960_qdss_a_clk,
 };
 
 static const struct rpm_clk_desc rpm_clk_msm8960 = {
