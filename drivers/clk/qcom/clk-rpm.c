@@ -441,7 +441,44 @@ static const struct rpm_clk_desc rpm_clk_msm8660 = {
 	.num_clks = ARRAY_SIZE(msm8660_clks),
 };
 
-/* apq8064 */
+/* MSM8960 */
+DEFINE_CLK_RPM(msm8960, afab_clk, afab_a_clk, QCOM_RPM_APPS_FABRIC_CLK);
+DEFINE_CLK_RPM(msm8960, cfpb_clk, cfpb_a_clk, QCOM_RPM_CFPB_CLK);
+DEFINE_CLK_RPM(msm8960, daytona_clk, daytona_a_clk, QCOM_RPM_DAYTONA_FABRIC_CLK);
+DEFINE_CLK_RPM(msm8960, ebi1_clk, ebi1_a_clk, QCOM_RPM_EBI1_CLK);
+DEFINE_CLK_RPM(msm8960, mmfab_clk, mmfab_a_clk, QCOM_RPM_MM_FABRIC_CLK);
+DEFINE_CLK_RPM(msm8960, mmfpb_clk, mmfpb_a_clk, QCOM_RPM_MMFPB_CLK);
+DEFINE_CLK_RPM(msm8960, sfab_clk, sfab_a_clk, QCOM_RPM_SYS_FABRIC_CLK);
+DEFINE_CLK_RPM(msm8960, sfpb_clk, sfpb_a_clk, QCOM_RPM_SFPB_CLK);
+DEFINE_CLK_RPM(msm8960, qdss_clk, qdss_a_clk, QCOM_RPM_QDSS_CLK);
+
+static struct clk_rpm *msm8960_clks[] = {
+	[RPM_APPS_FABRIC_CLK] = &msm8960_afab_clk,
+	[RPM_APPS_FABRIC_A_CLK] = &msm8960_afab_a_clk,
+	[RPM_CFPB_CLK] = &msm8960_cfpb_clk,
+	[RPM_CFPB_A_CLK] = &msm8960_cfpb_a_clk,
+	[RPM_DAYTONA_FABRIC_CLK] = &msm8960_daytona_clk,
+	[RPM_DAYTONA_FABRIC_A_CLK] = &msm8960_daytona_a_clk,
+	[RPM_EBI1_CLK] = &msm8960_ebi1_clk,
+	[RPM_EBI1_A_CLK] = &msm8960_ebi1_a_clk,
+	[RPM_MM_FABRIC_CLK] = &msm8960_mmfab_clk,
+	[RPM_MM_FABRIC_A_CLK] = &msm8960_mmfab_a_clk,
+	[RPM_MMFPB_CLK] = &msm8960_mmfpb_clk,
+	[RPM_MMFPB_A_CLK] = &msm8960_mmfpb_a_clk,
+	[RPM_SYS_FABRIC_CLK] = &msm8960_sfab_clk,
+	[RPM_SYS_FABRIC_A_CLK] = &msm8960_sfab_a_clk,
+	[RPM_SFPB_CLK] = &msm8960_sfpb_clk,
+	[RPM_SFPB_A_CLK] = &msm8960_sfpb_a_clk,
+	[RPM_QDSS_CLK] = &msm8960_qdss_clk,
+	[RPM_QDSS_A_CLK] = &msm8960_qdss_a_clk,
+};
+
+static const struct rpm_clk_desc rpm_clk_msm8960 = {
+	.clks = msm8960_clks,
+	.num_clks = ARRAY_SIZE(msm8960_clks),
+};
+
+/* APQ8064 */
 DEFINE_CLK_RPM(apq8064, afab_clk, afab_a_clk, QCOM_RPM_APPS_FABRIC_CLK);
 DEFINE_CLK_RPM(apq8064, cfpb_clk, cfpb_a_clk, QCOM_RPM_CFPB_CLK);
 DEFINE_CLK_RPM(apq8064, daytona_clk, daytona_a_clk, QCOM_RPM_DAYTONA_FABRIC_CLK);
@@ -525,6 +562,7 @@ static const struct rpm_clk_desc rpm_clk_ipq806x = {
 static const struct of_device_id rpm_clk_match_table[] = {
 	{ .compatible = "qcom,rpmcc-msm8660", .data = &rpm_clk_msm8660 },
 	{ .compatible = "qcom,rpmcc-apq8060", .data = &rpm_clk_msm8660 },
+	{ .compatible = "qcom,rpmcc-msm8960", .data = &rpm_clk_msm8960 },
 	{ .compatible = "qcom,rpmcc-apq8064", .data = &rpm_clk_apq8064 },
 	{ .compatible = "qcom,rpmcc-ipq806x", .data = &rpm_clk_ipq806x },
 	{ }

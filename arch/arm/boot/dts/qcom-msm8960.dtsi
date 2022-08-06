@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 /dts-v1/;
 
-#include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/clock/qcom,gcc-msm8960.h>
 #include <dt-bindings/clock/qcom,lcc-msm8960.h>
 #include <dt-bindings/reset/qcom,gcc-msm8960.h>
+#include <dt-bindings/clock/qcom,rpmcc.h>
 #include <dt-bindings/mfd/qcom-rpm.h>
 #include <dt-bindings/soc/qcom,gsbi.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
 
 / {
 	#address-cells = <1>;
@@ -14,6 +15,22 @@
 	model = "Qualcomm MSM8960";
 	compatible = "qcom,msm8960";
 	interrupt-parent = <&intc>;
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		smem_region: smem@80000000 {
+			reg = <0x80000000 0x200000>;
+			no-map;
+		};
+
+		wcnss_mem: wcnss@8f000000 {
+			reg = <0x8f000000 0x700000>;
+			no-map;
+		};
+	};
 
 	cpus {
 		#address-cells = <1>;
@@ -89,11 +106,122 @@
 		regulator-always-on;
 	};
 
+	smem {
+		compatible = "qcom,smem";
+		memory-region = <&smem_region>;
+
+		hwlocks = <&sfpb_mutex 3>;
+	};
+
+	smd {
+		compatible = "qcom,smd";
+
+		modem-edge {
+			interrupts = <GIC_SPI 37 IRQ_TYPE_EDGE_RISING>;
+
+			qcom,ipc = <&l2cc 8 3>;
+			qcom,smd-edge = <0>;
+
+			status = "disabled";
+		};
+
+		q6-edge {
+			interrupts = <GIC_SPI 90 IRQ_TYPE_EDGE_RISING>;
+
+			qcom,ipc = <&l2cc 8 15>;
+			qcom,smd-edge = <1>;
+
+			status = "disabled";
+		};
+
+		dsps-edge {
+			interrupts = <GIC_SPI 138 IRQ_TYPE_EDGE_RISING>;
+
+			qcom,ipc = <&sps_sic_non_secure 0x4080 0>;
+			qcom,smd-edge = <3>;
+
+			status = "disabled";
+		};
+
+		riva-edge {
+			interrupts = <GIC_SPI 198 IRQ_TYPE_EDGE_RISING>;
+
+			qcom,ipc = <&l2cc 8 25>;
+			qcom,smd-edge = <6>;
+
+			status = "disabled";
+		};
+	};
+
+	smsm {
+		compatible = "qcom,smsm";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,ipc-1 = <&l2cc 8 4>;
+		qcom,ipc-2 = <&l2cc 8 14>;
+		qcom,ipc-3 = <&l2cc 8 23>;
+		qcom,ipc-4 = <&sps_sic_non_secure 0x4094 0>;
+
+		apps_smsm: apps@0 {
+			reg = <0>;
+			#qcom,smem-state-cells = <1>;
+		};
+
+		modem_smsm: modem@1 {
+			reg = <1>;
+			interrupts = <GIC_SPI 38 IRQ_TYPE_EDGE_RISING>;
+
+			interrupt-controller;
+			#interrupt-cells = <2>;
+		};
+
+		q6_smsm: q6@2 {
+			reg = <2>;
+			interrupts = <GIC_SPI 89 IRQ_TYPE_EDGE_RISING>;
+
+			interrupt-controller;
+			#interrupt-cells = <2>;
+		};
+
+		wcnss_smsm: wcnss@3 {
+			reg = <3>;
+			interrupts = <GIC_SPI 204 IRQ_TYPE_EDGE_RISING>;
+
+			interrupt-controller;
+			#interrupt-cells = <2>;
+		};
+
+		dsps_smsm: dsps@4 {
+			reg = <4>;
+			interrupts = <GIC_SPI 137 IRQ_TYPE_EDGE_RISING>;
+
+			interrupt-controller;
+			#interrupt-cells = <2>;
+		};
+	};
+
+	firmware {
+		scm {
+			compatible = "qcom,scm-msm8960", "qcom,scm";
+
+			clocks = <&rpmcc RPM_DAYTONA_FABRIC_CLK>;
+			clock-names = "core";
+		};
+	};
+
 	soc: soc {
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
 		compatible = "simple-bus";
+
+		sfpb_mutex: hwmutex@1200000 {
+			compatible = "qcom,sfpb-mutex";
+			reg = <0x01200000 0x8000>;
+			#hwlock-cells = <1>;
+		};
 
 		intc: interrupt-controller@2000000 {
 			compatible = "qcom,msm-qgic2";
@@ -197,8 +325,65 @@
 				     <GIC_SPI 22 IRQ_TYPE_EDGE_RISING>;
 			interrupt-names = "ack", "err", "wakeup";
 
+			rpmcc: clock-controller {
+				compatible = "qcom,rpmcc-msm8960", "qcom,rpmcc";
+				#clock-cells = <1>;
+				clocks = <&pxo_board>, <&cxo_board>;
+				clock-names = "pxo", "cxo";
+			};
+
 			regulators {
 				compatible = "qcom,rpm-pm8921-regulators";
+
+				pm8921_s1: s1 {};
+				pm8921_s2: s2 {};
+				pm8921_s3: s3 {};
+				pm8921_s4: s4 {};
+				pm8921_s7: s7 {};
+				pm8921_s8: s8 {};
+
+				pm8921_l1: l1 {};
+				pm8921_l2: l2 {};
+				pm8921_l3: l3 {};
+				pm8921_l4: l4 {};
+				pm8921_l5: l5 {};
+				pm8921_l6: l6 {};
+				pm8921_l7: l7 {};
+				pm8921_l8: l8 {};
+				pm8921_l9: l9 {};
+				pm8921_l10: l10 {};
+				pm8921_l11: l11 {};
+				pm8921_l12: l12 {};
+				pm8921_l14: l14 {};
+				pm8921_l15: l15 {};
+				pm8921_l16: l16 {};
+				pm8921_l17: l17 {};
+				pm8921_l18: l18 {};
+				pm8921_l21: l21 {};
+				pm8921_l22: l22 {};
+				pm8921_l23: l23 {};
+				pm8921_l24: l24 {};
+				pm8921_l25: l25 {};
+				pm8921_l26: l26 {};
+				pm8921_l27: l27 {};
+				pm8921_l28: l28 {};
+				pm8921_l29: l29 {};
+
+				pm8921_lvs1: lvs1 {};
+				pm8921_lvs2: lvs2 {};
+				pm8921_lvs3: lvs3 {};
+				pm8921_lvs4: lvs4 {};
+				pm8921_lvs5: lvs5 {};
+				pm8921_lvs6: lvs6 {};
+				pm8921_lvs7: lvs7 {};
+
+				pm8921_usb_switch: usb-switch {};
+
+				pm8921_hdmi_switch: hdmi-switch {
+					bias-pull-down;
+				};
+
+				pm8921_ncp: ncp {};
 			};
 		};
 
@@ -253,6 +438,11 @@
 			compatible = "qcom,saw2";
 			reg = <0x02099000 0x1000>, <0x02009000 0x1000>;
 			regulator;
+		};
+
+		sps_sic_non_secure: sps-sic-non-secure@12100000 {
+			compatible = "qcom,sic-non-secure", "syscon";
+			reg = <0x12100000 0x10000>;
 		};
 
 		gsbi1: gsbi@16000000 {
@@ -544,6 +734,72 @@
 		tcsr: syscon@1a400000 {
 			compatible = "qcom,tcsr-msm8960", "syscon";
 			reg = <0x1a400000 0x100>;
+		};
+
+		riva: riva-pil@3204000 {
+			compatible = "qcom,riva-pil";
+
+			reg = <0x03200800 0x1000>, <0x03202000 0x2000>, <0x03204000 0x100>;
+			reg-names = "ccu", "dxe", "pmu";
+
+			interrupts-extended = <&intc GIC_SPI 199 IRQ_TYPE_EDGE_RISING>,
+					      <&wcnss_smsm 6 IRQ_TYPE_EDGE_RISING>,
+					      <&wcnss_smsm 7 IRQ_TYPE_EDGE_RISING>,
+					      <&wcnss_smsm 8 IRQ_TYPE_EDGE_RISING>,
+					      <&wcnss_smsm 9 IRQ_TYPE_EDGE_RISING>;
+			interrupt-names = "wdog", "fatal", "ready", "handover", "stop-ack";
+
+			memory-region = <&wcnss_mem>;
+
+			vddcx-supply = <&pm8921_s3>;
+			vddmx-supply = <&pm8921_l24>;
+			vddpx-supply = <&pm8921_s4>;
+
+			status = "disabled";
+
+			iris {
+				compatible = "qcom,wcn3620";
+
+				clocks = <&cxo_board>;
+				clock-names = "xo";
+
+				vddxo-supply = <&pm8921_l4>;
+				vddrfa-supply = <&pm8921_s2>;
+				vddpa-supply = <&pm8921_l10>;
+				vdddig-supply = <&pm8921_lvs2>;
+			};
+
+			smd-edge {
+				interrupts = <GIC_SPI 198 IRQ_TYPE_EDGE_RISING>;
+
+				qcom,ipc = <&l2cc 8 25>;
+				qcom,smd-edge = <6>;
+
+				label = "riva";
+
+				wcnss {
+					compatible = "qcom,wcnss";
+					qcom,smd-channels = "WCNSS_CTRL";
+
+					qcom,mmio = <&riva>;
+
+					bluetooth {
+						compatible = "qcom,wcnss-bt";
+					};
+
+					wifi {
+						compatible = "qcom,wcnss-wlan";
+
+						interrupts = <GIC_SPI 203 IRQ_TYPE_LEVEL_HIGH>,
+							     <GIC_SPI 202 IRQ_TYPE_LEVEL_HIGH>;
+						interrupt-names = "tx", "rx";
+
+						qcom,smem-states = <&apps_smsm 10>, <&apps_smsm 9>;
+						qcom,smem-state-names = "tx-enable", "tx-rings-empty";
+						local-mac-address = [ 18 00 2d 88 9c a9 ];
+					};
+				};
+			};
 		};
 	};
 };
